@@ -3,7 +3,6 @@ import GameBoard from './components/GameBoard.vue';
 import { useScoreStore } from './stores/score';
 
 const score = useScoreStore();
-
 </script>
 
 <template>
