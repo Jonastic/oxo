@@ -1,48 +1,35 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { Player } from '../entities/player';
-import { Cell } from '../entities/cell';
+import { Board } from '../entities/board';
 import { useScoreStore } from '../stores/score';
+import { AI } from '../entities/ai';
 
 const score = useScoreStore();
 
 const showOverlay = ref(false);
 const winner = ref<'player' | 'computer' | 'draw' | null>(null);
 
-const cells = ref<Cell[]>(Array.from({ length: 9 }, (_, i) => ({
-  index: i,
-  playerIndex: null
-})));
+const board = ref<Board>(new Board());
 const players = ref([
   new Player('Player', 'X', '#2196F3'),
   new Player('Computer', 'O', '#FF5722')
 ]);
 let currentPlayerIndex = ref(0);
 
-const winningCombinations = [
-  [0, 1, 2],
-  [3, 4, 5],
-  [6, 7, 8],
-  [0, 3, 6],
-  [1, 4, 7],
-  [2, 5, 8],
-  [0, 4, 8],
-  [2, 4, 6]
-];
-
 function handleClick(index: number) {
-  const cell = cells.value[index];
+  const cell = board.value.cells[index];
   if (cell.playerIndex) return;
 
   cell.playerIndex = currentPlayerIndex.value;
 
-  if (checkWinner()) {
+  if (board.value.hasWon(currentPlayerIndex.value)) {
     endGame(currentPlayerIndex.value === 0 ? 'player' : 'computer');
 
     return
   }
 
-  if (cells.value.every(cell => cell.playerIndex !== null)) {
+  if (board.value.isFull()) {
     endGame('draw');
 
     return
@@ -51,7 +38,7 @@ function handleClick(index: number) {
   currentPlayerIndex.value = 1 - currentPlayerIndex.value;
 
   if (currentPlayerIndex.value === 1) {
-    chooseForComputer();
+    chooseForComputer()
   }
 }
 
@@ -69,9 +56,7 @@ function endGame(winnerType: 'player' | 'computer' | 'draw') {
 }
 
 function nextGame() {
-  cells.value.forEach(cell => {
-     cell.playerIndex = null;
-  });
+  board.value.reset();
 
   currentPlayerIndex.value = 0;
   showOverlay.value = false
@@ -79,20 +64,10 @@ function nextGame() {
 }
 
 function chooseForComputer() {
-  const availableCells = cells.value.filter((cell) => cell.playerIndex === null);
-  const availableCellIndex = Math.floor(Math.random() * availableCells.length);
+  const ai = new AI(board.value.cells);
+  const cell = ai.determineNextMove()
   
-  handleClick(availableCells[availableCellIndex].index);
-}
-
-function checkWinner(): boolean {
-  return winningCombinations.some(([a, b, c]) => {
-    return (
-      cells.value[a].playerIndex === currentPlayerIndex.value &&
-      cells.value[b].playerIndex === currentPlayerIndex.value &&
-      cells.value[c].playerIndex === currentPlayerIndex.value
-    );
-  });
+  handleClick(cell.index);
 }
 </script>
 
@@ -123,7 +98,7 @@ function checkWinner(): boolean {
 
   <div class="board">
     <div 
-      v-for="(cell, index) in cells" 
+      v-for="(cell, index) in board.cells" 
       :key="index" 
       class="cell" 
       :class="{ taken: cell.playerIndex !== null }"
