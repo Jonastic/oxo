@@ -9,7 +9,8 @@ const score = useScoreStore();
 const showOverlay = ref(false);
 const winner = ref<'player' | 'computer' | 'draw' | null>(null);
 
-const cells = ref<Cell[]>(Array.from({ length: 9 }, () => ({
+const cells = ref<Cell[]>(Array.from({ length: 9 }, (_, i) => ({
+  index: i,
   playerIndex: null
 })));
 const players = ref([
@@ -48,6 +49,10 @@ function handleClick(index: number) {
   }
 
   currentPlayerIndex.value = 1 - currentPlayerIndex.value;
+
+  if (currentPlayerIndex.value === 1) {
+    chooseForComputer();
+  }
 }
 
 function endGame(winnerType: 'player' | 'computer' | 'draw') {
@@ -71,6 +76,13 @@ function nextGame() {
   currentPlayerIndex.value = 0;
   showOverlay.value = false
   winner.value = null
+}
+
+function chooseForComputer() {
+  const availableCells = cells.value.filter((cell) => cell.playerIndex === null);
+  const availableCellIndex = Math.floor(Math.random() * availableCells.length);
+  
+  handleClick(availableCells[availableCellIndex].index);
 }
 
 function checkWinner(): boolean {
