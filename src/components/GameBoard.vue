@@ -15,13 +15,20 @@ const players = ref([
   new Player('Player', 'X', '#2196F3'),
   new Player('Computer', 'O', '#FF5722')
 ]);
-let currentPlayerIndex = ref(0);
+const currentPlayerIndex = ref(0);
+const clickedCellIndex = ref<number | null>(null);
 
 function handleClick(index: number) {
   const cell = board.value.cells[index];
   if (cell.playerIndex) return;
 
   cell.playerIndex = currentPlayerIndex.value;
+
+  clickedCellIndex.value = index;
+
+  setTimeout(() => {
+    clickedCellIndex.value = null;
+  }, 200)
 
   if (board.value.hasWon(currentPlayerIndex.value)) {
     endGame(currentPlayerIndex.value === 0 ? 'player' : 'computer');
@@ -38,7 +45,9 @@ function handleClick(index: number) {
   currentPlayerIndex.value = 1 - currentPlayerIndex.value;
 
   if (currentPlayerIndex.value === 1) {
-    chooseForComputer()
+    setTimeout(() => {
+      chooseForComputer()
+    }, 500)
   }
 }
 
@@ -96,12 +105,15 @@ function chooseForComputer() {
     </div>
   </transition>
 
-  <div class="board">
+  <div 
+    class="board"
+    :class="{'disabled': currentPlayerIndex === 1}"
+  >
     <div 
       v-for="(cell, index) in board.cells" 
       :key="index" 
       class="cell" 
-      :class="{ taken: cell.playerIndex !== null }"
+      :class="{ taken: cell.playerIndex !== null, clicked: clickedCellIndex === index }"
       @click="handleClick(index)"
     >
       <span v-if="cell.playerIndex !== null" :style="`color: ${players[cell.playerIndex].color}`">
@@ -120,7 +132,12 @@ function chooseForComputer() {
   padding: 5px;
 }
 
+.board.disabled {
+  pointer-events: none;
+}
+
 .cell {
+  position: relative;
   width: 100px;
   height: 100px;
   display: flex;
@@ -130,6 +147,7 @@ function chooseForComputer() {
   border: 1px solid #ccc;
   font-size: 48px;
   cursor: pointer;
+  transition: transform 0.1s ease, box-shadow 0.2s ease;
 }
 
 .cell:hover {
@@ -138,6 +156,17 @@ function chooseForComputer() {
 
 .cell.taken {
   pointer-events: none;
+}
+
+.cell.clicked {
+  animation: clickBounce 0.2s ease;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.6);
+}
+
+@keyframes clickBounce {
+  0% { transform: scale(1); }
+  50% { transform: scale(0.9); }
+  100% { transform: scale(1); }
 }
 
 .overlay {
