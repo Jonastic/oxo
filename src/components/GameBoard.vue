@@ -12,8 +12,8 @@ const winner = ref<'player' | 'computer' | 'draw' | null>(null);
 
 const board = ref<Board>(new Board());
 const players = ref([
-  new Player('Player', 'X', '#2196F3'),
-  new Player('Computer', 'O', '#FF5722')
+  new Player('Player', 'X', '#3b82f6'),
+  new Player('Computer', 'O', '#ef4444')
 ]);
 const currentPlayerIndex = ref(0);
 const clickedCellIndex = ref<number | null>(null);
@@ -114,9 +114,10 @@ function chooseForComputer() {
       :key="index" 
       class="cell" 
       :class="{ taken: cell.playerIndex !== null, clicked: clickedCellIndex === index }"
+      :style="cell.playerIndex !== null ? {backgroundColor:players[cell.playerIndex].color} : null"
       @click="handleClick(index)"
     >
-      <span v-if="cell.playerIndex !== null" :style="`color: ${players[cell.playerIndex].color}`">
+      <span v-if="cell.playerIndex !== null">
         {{ players[cell.playerIndex].letter }}
       </span>
     </div>
@@ -144,10 +145,12 @@ function chooseForComputer() {
   justify-content: center;
   align-items: center;
   background-color: #fff;
-  border: 1px solid #ccc;
-  font-size: 48px;
+  font-size: 64px;
+  font-weight: bold;
   cursor: pointer;
   transition: transform 0.1s ease, box-shadow 0.2s ease;
+  transition: background-color 0.3s ease, transform 0.1s ease;
+  color: white;
 }
 
 .cell:hover {
@@ -160,7 +163,7 @@ function chooseForComputer() {
 
 .cell.clicked {
   animation: clickBounce 0.2s ease;
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.6);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
 }
 
 @keyframes clickBounce {
