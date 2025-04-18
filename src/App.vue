@@ -1,13 +1,11 @@
 <script setup lang="ts">
 import GameBoard from './components/GameBoard.vue';
-import { useScoreStore } from './stores/score';
-
-const score = useScoreStore();
+import StatusBar from './components/StatusBar.vue';
 </script>
 
 <template>
   <header>
-    <h1>TicTacToe</h1>
+      <h1 class="title">TicTacToe</h1>
   </header>
 
   <main>
@@ -15,10 +13,6 @@ const score = useScoreStore();
   </main>
 
   <footer>
-    <span title="Wins">✅ {{ score.wins }}</span> 
-    <span title="Current streak">🔥 {{ score.currentStreak }}</span> 
-    <span title="Max streak">🏆 {{ score.maxStreak }}</span> 
-    <span title="Losses">❌ {{ score.losses }}</span>
-    <span title="Draws">🟰 {{ score.draws }}</span>
+    <StatusBar />
   </footer>
 </template>
